@@ -92,7 +92,14 @@ public class SoundManager
         }
     }
 
-    public void stopSound(int x){
+    public void stopSound(){
         currentPlayingSong.stop();
+    }
+    public int[] getSongList(){
+        int[] res = new int[num];
+        for (int i = 0; i < num; i++){
+            res[i]=i;
+        }
+        return res;
     }
 }

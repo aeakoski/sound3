@@ -1,58 +1,78 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
+        ClassLoader loader = Main.class.getClassLoader();
+        String[] songs = {"inception.wav", "daftpunk.wav", "rigoletto.wav"};
         System.out.println("Encryption Player!\n");
         SoundManager sm = new SoundManager();
+        SoundManager sm_fips = new SoundManager();
         boolean fipsIsEnabled = false;
 
         try{
-            // /home/koski/sound3/src/inception.wav
-            sm.addClipToPlaylist("inception.wav");
+            for (String song : songs) {
+                sm.addClipToPlaylist(song);
 
-            InputStream enc_is = encryptMusicFileToInputStream("/home/koski/sound3/src/inception.wav");
-            sm.addInputStreamClipToPlayList(enc_is);
+                String filePath = loader.getResource(song).toString();
+                filePath = filePath.substring(5);
+
+                InputStream enc_is = encryptMusicFileToInputStream(filePath);
+                sm_fips.addInputStreamClipToPlayList(enc_is);
+
+            }
+
+
 
             Scanner scanner = new Scanner(System.in);
-            String choice = "start";
+            String choice;
             System.out.println("\n\nWelcome to MUSIC PLAYER");
             while (true){
-                System.out.println("\nPlaylist");
-                System.out.println("0");
-                System.out.println("1");
+                System.out.println("\n------------------------");
+                System.out.println("Playlist, avalible songs");
+                if (fipsIsEnabled){
+                    System.out.println("IN FIPS MODE");
+                }
+                for (int songIndex:sm.getSongList()) {
+                    System.out.println("Song: " + songIndex);
+                }
+
                 System.out.print("Option: ");
                 choice = scanner.nextLine();
 
+                if(choice.equals("stop")){
+                    if(fipsIsEnabled){
+                        sm_fips.stopSound();
+                    } else{
+                        sm.stopSound();
+                    }
+                    continue;
+                }
                 if(choice.equals("exit")){
                     break;
                 }
                 if(choice.equals("fips")) {
                     fipsIsEnabled = !fipsIsEnabled;
-                    System.out.println("FIPS MODE ENABLED");
+                    System.out.println("FIPS MODE TOGGLED");
                     continue;
                 }
-                if (fipsIsEnabled){
-                    System.out.println("IN FIPS MODE");
-                }
-
 
                 System.out.println("Playing song nr: " + choice);
-                sm.playSound(Integer.parseInt(choice));
+                if(fipsIsEnabled){
+                    sm_fips.playSound(Integer.parseInt(choice));
+                } else{
+                    sm.playSound(Integer.parseInt(choice));
+                }
+
 
             }
 
             System.out.println("Exiting music player");
 
-
             scanner.close();
-
-
-            //sm.playSound(1);
 
         } catch (Exception e){
             System.out.println("Error loading test.wav");
