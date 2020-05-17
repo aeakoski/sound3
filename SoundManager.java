@@ -12,6 +12,8 @@ public class SoundManager
     private Vector infos;
     private Vector audios;
     private int num=0;
+    Clip currentPlayingSong;
+
 
     public SoundManager()
     {
@@ -83,10 +85,14 @@ public class SoundManager
         }
         else
         {
-            Clip clip = (Clip) AudioSystem.getLine((DataLine.Info)infos.elementAt(x));
-            clip.open((AudioFormat)afs.elementAt(x), (byte[])audios.elementAt(x), 0, ((Integer)sizes.elementAt(x)).intValue());
-            clip.start();
-            clip.drain(); //Blocking
+            currentPlayingSong = (Clip) AudioSystem.getLine((DataLine.Info)infos.elementAt(x));
+            currentPlayingSong.open((AudioFormat)afs.elementAt(x), (byte[])audios.elementAt(x), 0, ((Integer)sizes.elementAt(x)).intValue());
+            currentPlayingSong.start();
+            //currentPlayingSong.drain(); //Blocking
         }
+    }
+
+    public void stopSound(int x){
+        currentPlayingSong.stop();
     }
 }

@@ -1,35 +1,59 @@
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
-import java.lang.reflect.Array;
-import java.security.spec.KeySpec;
-import java.util.Base64;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
-        //String s = encrypt("hello");
-        //InputStream is_bytes = encrypt_bytes();
-        //System.out.println(s);
-
-        //bytePlayMusic("/home/koski/Desktop/inception.wav");
+        System.out.println("Encryption Player!\n");
         SoundManager sm = new SoundManager();
+        boolean fipsIsEnabled = false;
+
         try{
             // /home/koski/sound3/src/inception.wav
             sm.addClipToPlaylist("inception.wav");
 
-            InputStream enc_is = bytePlayMusic("/home/koski/sound3/src/inception.wav");
+            InputStream enc_is = encryptMusicFileToInputStream("/home/koski/sound3/src/inception.wav");
             sm.addInputStreamClipToPlayList(enc_is);
 
-            sm.playSound(0);
-            sm.playSound(1);
+            Scanner scanner = new Scanner(System.in);
+            String choice = "start";
+            System.out.println("\n\nWelcome to MUSIC PLAYER");
+            while (true){
+                System.out.println("\nPlaylist");
+                System.out.println("0");
+                System.out.println("1");
+                System.out.print("Option: ");
+                choice = scanner.nextLine();
+
+                if(choice.equals("exit")){
+                    break;
+                }
+                if(choice.equals("fips")) {
+                    fipsIsEnabled = !fipsIsEnabled;
+                    System.out.println("FIPS MODE ENABLED");
+                    continue;
+                }
+                if (fipsIsEnabled){
+                    System.out.println("IN FIPS MODE");
+                }
+
+
+                System.out.println("Playing song nr: " + choice);
+                sm.playSound(Integer.parseInt(choice));
+
+            }
+
+            System.out.println("Exiting music player");
+
+
+            scanner.close();
+
+
+            //sm.playSound(1);
+
         } catch (Exception e){
             System.out.println("Error loading test.wav");
             System.out.println(e);
@@ -38,7 +62,8 @@ public class Main {
 
     }
 
-    public static InputStream bytePlayMusic(String filepth){
+    public static InputStream encryptMusicFileToInputStream(String filepth){
+
         InputStream music;
         try{
             music = new FileInputStream(new File(filepth));
@@ -64,6 +89,7 @@ public class Main {
             byte[] encrypted_music_data = Convert.bytesToEncryptedBytes(music_data); //encrypt_bytes(music_data);
 
             // encrypted_wav = music_headder_bytes + encrypted_music_bytes
+            System.out.println("Encrypting songs:");
             System.out.println("music_headder.length");
             System.out.println(music_headder.length);
             System.out.println("music_data.length");
